@@ -1182,7 +1182,6 @@ AST::Expr* Parser::WalkExpression(const clang::Expr* Expr)
         _S->_operator = (OverloadedOperatorKind) S->getOperator();
         _S->isAssignmentOp = S->isAssignmentOp();
         _S->isInfixBinaryOp = S->isInfixBinaryOp();
-        _S->isFPContractableWithinStatement = S->isFPContractableWithinStatement();
         _Expr = _S;
         break;
     }

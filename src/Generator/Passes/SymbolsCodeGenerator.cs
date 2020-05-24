@@ -136,7 +136,7 @@ namespace CppSharp.Passes
                 Write($@"({string.Join(", ", method.Parameters.Select(
                     p => cppTypePrinter.VisitParameter(p)))})");
                 WriteLine($": {@namespace}({@params}) {{}} }};");
-                Write($"extern \"C\" {{ void {wrapper}({signature}) ");
+                Write($"extern \"C\" {{ {GetExporting()}void {wrapper}({signature}) ");
                 WriteLine($"{{ new ({Helpers.InstanceField}) {wrapper}{@namespace}({@params}); }} }}");
             }
             else
@@ -145,7 +145,7 @@ namespace CppSharp.Passes
                 if (method.Namespace.Access == AccessSpecifier.Protected)
                     Write($@"{{ class {wrapper}{method.Namespace.Namespace.Name} : public {
                         method.Namespace.Namespace.Visit(cppTypePrinter)} ");
-                Write($"{{ void {wrapper}({signature}) ");
+                Write($"{{ {GetExporting()}void {wrapper}({signature}) ");
                 Write($"{{ new ({Helpers.InstanceField}) {@namespace}({@params}); }} }}");
                 if (method.Namespace.Access == AccessSpecifier.Protected)
                     Write("; }");
@@ -186,7 +186,7 @@ namespace CppSharp.Passes
             if (method.Namespace.Access == AccessSpecifier.Protected)
                 Write($@"class {wrapper}{method.Namespace.Namespace.Name} : public {
                     method.Namespace.Namespace.Visit(cppTypePrinter)} {{ ");
-            Write($"void {wrapper}");
+            Write($"{GetExporting()}void {wrapper}");
             if (isProtected)
                 Write("Protected");
 
@@ -196,7 +196,7 @@ namespace CppSharp.Passes
             if (isProtected)
             {
                 NewLine();
-                Write($@"extern ""C"" {{ void {wrapper}({wrapper}* {instance}) {{ {
+                Write($@"extern ""C"" {{ {GetExporting()}void {wrapper}({wrapper}* {instance}) {{ {
                     instance}->{wrapper}Protected({instance}); }} }}");
             }
             if (method.Namespace.Access == AccessSpecifier.Protected)

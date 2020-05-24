@@ -498,6 +498,7 @@ public:
     bool isDecrementOp;
     bool isIncrementDecrementOp;
     bool isArithmeticOp;
+    bool isFPContractableWithinStatement;
 };
 
 class CS_API OffsetOfExpr : public Expr

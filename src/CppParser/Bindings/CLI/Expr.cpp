@@ -1497,6 +1497,16 @@ void CppSharp::Parser::AST::UnaryOperator::IsArithmeticOp::set(bool value)
     ((::CppSharp::CppParser::AST::UnaryOperator*)NativePtr)->isArithmeticOp = value;
 }
 
+bool CppSharp::Parser::AST::UnaryOperator::IsFPContractableWithinStatement::get()
+{
+    return ((::CppSharp::CppParser::AST::UnaryOperator*)NativePtr)->isFPContractableWithinStatement;
+}
+
+void CppSharp::Parser::AST::UnaryOperator::IsFPContractableWithinStatement::set(bool value)
+{
+    ((::CppSharp::CppParser::AST::UnaryOperator*)NativePtr)->isFPContractableWithinStatement = value;
+}
+
 CppSharp::Parser::AST::OffsetOfExpr::OffsetOfExpr(::CppSharp::CppParser::AST::OffsetOfExpr* native)
     : CppSharp::Parser::AST::Expr((::CppSharp::CppParser::AST::Expr*)native)
 {
