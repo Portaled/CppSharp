@@ -1617,7 +1617,7 @@ namespace CppSharp.Generators.CSharp
             for (int i = 0; i < @class.Layout.VTablePointers.Count; i++)
             {
                 var offset = @class.Layout.VTablePointers[i].Offset;
-                WriteLine($"*(void**) ({Helpers.InstanceIdentifier} + {offset}) = {table}[{i}];");
+                WriteLine($"*(void**) ((byte*){Helpers.InstanceIdentifier}.ToPointer() + {offset}) = {table}[{i}];");
             }
         }
 
@@ -1627,7 +1627,7 @@ namespace CppSharp.Generators.CSharp
                 @class = @class.Specializations[0];
 
             Write($@"new void*[] {{ {string.Join(", ", @class.Layout.VTablePointers.Select(
-                v => $"*(void**) ({Helpers.InstanceIdentifier} + {v.Offset})"))} }};");
+                v => $"*(void**) ((byte*){Helpers.InstanceIdentifier}.ToPointer() + {v.Offset})"))} }};");
         }
 
         private void AllocateNewVTablesMS(Class @class, IList<VTableComponent> wrappedEntries,
@@ -1674,9 +1674,9 @@ namespace CppSharp.Generators.CSharp
 
             string vfptr = $"vfptr{suffix}";
             // obtain a pointer in the table to the start of virtual functions
-            WriteLine($"var {vfptr} = {vtptr} + {offsetRTTI} * {pointerSize};");
-            var managedVTables = destructorOnly ? "__ManagedVTablesDtorOnly" : "__ManagedVTables";
-            WriteLine($"{managedVTables}[{tableIndex}] = {vfptr}.ToPointer();");
+            WriteLine($"var {vfptr} = (void*)((int*){vtptr}.ToPointer() + {offsetRTTI});");
+            var managedVTables = destructorOnly ? "__ManagedVTablesDtorOnly" : "__ManagedVTables"; 
+            WriteLine($"{managedVTables}[{tableIndex}] = {vfptr};"); //done3
 
             // fill the newly allocated v-table
             for (var i = 0; i < entries.Count; i++)
@@ -1686,7 +1686,9 @@ namespace CppSharp.Generators.CSharp
 
                 var nativeVftableEntry = $@"*(void**) (new IntPtr(*(void**) {
                     Helpers.InstanceIdentifier}) + {vptrOffset} + {offset})";
-                var managedVftableEntry = $"*(void**) ({vfptr} + {offset})";
+
+
+                var managedVftableEntry = $"*(void**) ((byte*){vfptr} + {offset})";
 
                 if ((entry.Kind == VTableComponentKind.FunctionPointer ||
                      entry.Kind == VTableComponentKind.DeletingDtorPointer) &&
@@ -2626,11 +2628,10 @@ namespace CppSharp.Generators.CSharp
             if (Context.ParserOptions.IsMicrosoftAbi)
                 vtableIndex = @class.Layout.VFTables.IndexOf(@class.Layout.VFTables.First(
                     v => v.Layout.Components.Any(c => c.Method == @virtual)));
-
-            WriteLine($@"var {Helpers.SlotIdentifier} = *(void**) ((IntPtr) {
+            //var __slot = *(void**)((int*)__OriginalVTables[0] + 1);
+            WriteLine($@"var {Helpers.SlotIdentifier} = *(void**) ((int*) {
                 (thisParam != null ? $"{thisParam.Name}."
-                : string.Empty)}__OriginalVTables[{vtableIndex}] + {i} * {
-                Context.TargetInfo.PointerWidth / 8});");
+                : string.Empty)}__OriginalVTables[{vtableIndex}] + {i});");
             if (method.IsDestructor && @class.IsAbstract)
             {
                 WriteLine("if ({0} != null)", Helpers.SlotIdentifier);
